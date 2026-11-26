@@ -6,3 +6,4 @@ pandas
 matplotlib
 mplfinance
 pytz
+six
