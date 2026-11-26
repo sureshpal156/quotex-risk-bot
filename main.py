@@ -999,14 +999,14 @@ async def qx_bal(update, context):
 
 
 async def mn_start(update, context):
-    await say(update, make_box() + '📅 *Monthly Calculator*' + NL + NL + '১. মাসিক Take Profit কত %? (যেমন 20):')
+    await say(update, make_box() + '📅 *Monthly Calculator*' + NL + NL + '১. প্রতিদিন Take Profit কত %? (যেমন 5):')
     return MN_TP
 
 
 async def mn_tp(update, context):
     v = parse_num(update.message.text)
     if v is None or v <= 0:
-        await say(update, '❌ সঠিক সংখ্যা লেখো (যেমন 20):', plain=True)
+        await say(update, '❌ সঠিক সংখ্যা লেখো (যেমন 5):', plain=True)
         return MN_TP
     context.user_data['mn'] = {'tp': v}
     await say(update, '২. তোমার অ্যাকাউন্ট ব্যালেন্স কত $? (যেমন 100):', plain=True)
@@ -1020,7 +1020,7 @@ async def mn_bal(update, context):
         return MN_BAL
     tp = context.user_data['mn']['tp']
     days = 18
-    daily = (1 + tp / 100) ** (1.0 / days) - 1
+    daily = tp / 100
     d = now_ist().date()
     today = d
     cur = bal
@@ -1039,17 +1039,19 @@ async def mn_bal(update, context):
             count += 1
             rows.append('✅ ' + str(count) + '. ' + label + ': +$' + format(profit, '.2f') + ' → $' + format(cur, '.2f') + mark)
         d += datetime.timedelta(days=1)
+    total_pct = (cur / bal - 1) * 100
     lines = [
         '📅 Monthly Plan (' + str(days) + ' ট্রেডিং দিন)',
         '',
-        '💼 শুরু: $' + format(bal, '.2f') + '  🎯 টার্গেট: ' + format(tp, 'g') + '%',
-        '📈 দৈনিক টার্গেট প্রায় ' + format(daily * 100, '.2f') + '% (দিনে দিনে বাড়ার হিসাব)',
+        '💼 শুরু: $' + format(bal, '.2f'),
+        '🎯 প্রতিদিন Take Profit: ' + format(tp, 'g') + '% (দিনের শুরুর ব্যালেন্সের ওপর)',
         '',
     ] + rows + [
         '',
-        '🏁 শেষে ব্যালেন্স: $' + format(cur, '.2f'),
+        '🏁 ' + str(days) + ' দিন পর ব্যালেন্স: $' + format(cur, '.2f'),
+        '🚀 মোট বৃদ্ধি: +' + format(total_pct, '.1f') + '%',
         '',
-        '⚠️ শুক্রবার, শনি, রবি বাদ। এটা পরিকল্পনার হিসাব, লাভের গ্যারান্টি না।',
+        '⚠️ শুক্রবার, শনি, রবি বাদ। প্রতিদিন টার্গেট পূরণ হলে এই হিসাব, বাস্তবে সব দিন পূরণ হয় না। লাভের গ্যারান্টি না।',
     ]
     await say(update, NL.join(lines), main_keyboard(), plain=True)
     return ConversationHandler.END
